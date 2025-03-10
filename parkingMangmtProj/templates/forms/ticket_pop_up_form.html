@@ -1,0 +1,85 @@
+<!-- Modal to View Tickets -->
+<div class="modal fade" id="viewTicketsModal" tabindex="-1" role="dialog" aria-labelledby="viewTicketsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewTicketsModalLabel">Tickets for {{ branch.branch_name }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Client Name</th>
+                <th>Location</th>
+                <th>Contact Number</th>
+                <th>Registration Time</th>
+                <th>Exit Time</th>
+                <th>Duration</th>
+                <th>Branch Name</th>
+                <th>Parking Slot</th>
+                <th>Total Amount </th>
+
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ticket in tickets %}
+                {% if ticket.branch.id == branch.id %}
+                  <tr>
+                    <td>{{ ticket.id }}</td>
+                    <td>{{ ticket.client.name }}</td>
+                    <td>{{ ticket.branch.location }}</td>
+                    <td>{{ ticket.client.contact_info }}</td>
+                    <td>{{ ticket.entry_time|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                      {% if ticket.exit_time %}
+                        {{ ticket.exit_time|date:"Y-m-d H:i:s" }}
+                      {% else %}
+                        Not Cleared Yet
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if ticket.duration %}
+                        {{ ticket.duration }} hours
+                      {% else %}
+                        <span>No exit time set</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ ticket.branch.branch_name }}</td>
+                    <td>{{ ticket.parking_slot.slot_number }}</td>
+                    <td>
+                     {% if ticket.fee_to_pay %}
+                        {{ ticket.fee_to_pay }}
+                      {% else %}
+                        <span>No total amount set</span>
+                      {% endif %}
+                    </td>
+                    
+                    <td>
+                      {% if not ticket.exit_time %}
+                        <a href="{% url 'clear_ticket' ticket.id %}" class="btn btn-sm btn-success">Clear</a>
+                      {% endif %}
+                      <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-sm btn-warning">Download</a>
+                    </td>
+                  </tr>
+                {% endif %}
+              {% empty %}
+                <tr>
+                  <td colspan="10">No tickets available for this branch.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

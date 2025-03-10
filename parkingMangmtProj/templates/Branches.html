@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Carmanage{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    {% include 'SpecificBranch/messages.html' %}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Add Branches to your Business Details</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <a href="{% url 'index' %}" class="nav-link">Home</a>
+                        <li class="breadcrumb-item active"></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Create the Branches for the Business</h3>
+                        </div>
+                        <form method="post" action="{% url 'branch-create' %}">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="branchName">Branch Name</label>
+                                    <input type="text" class="form-control" id="branchName" name="branch_name" placeholder="Enter Branch Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="location">Location</label>
+                                    <textarea class="form-control" id="location" name="location" placeholder="Enter Location" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactNumber">Contact Number</label>
+                                    <input type="text" class="form-control" id="contactNumber" name="contact_number" placeholder="Enter Contact Number">
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="activeStatus" name="is_active" checked>
+                                    <label class="form-check-label" for="activeStatus">Is Active</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="mainBranch" name="is_main_branch">
+                                    <label class="form-check-label" for="mainBranch">Is Main Branch</label>
+                                </div>
+                                <hr>
+                                <h5>Parking Slots</h5>
+                                <div class="form-group">
+                                    <label for="parkingSlotIdentifier">Parking Slot Identifier (e.g., B, G)</label>
+                                    <input type="text" class="form-control" id="parkingSlotIdentifier" name="parking_slot_identifier" placeholder="Enter Parking Slot Identifier" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="numberOfSlots">Number of Parking Slots</label>
+                                    <input type="number" class="form-control" id="numberOfSlots" name="number_of_slots" placeholder="Enter Number of Parking Slots" required>
+                                </div>
+                                <hr>
+                                <h5>Manager Details</h5>
+                                <div class="form-group">
+                                    <label for="managerFirstName">Manager First Name</label>
+                                    <input type="text" class="form-control" id="managerFirstName" name="manager_first_name" placeholder="Enter Manager First Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="managerLastName">Manager Last Name</label>
+                                    <input type="text" class="form-control" id="managerLastName" name="manager_last_name" placeholder="Enter Manager Last Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="managerEmail">Manager Email</label>
+                                    <input type="email" class="form-control" id="managerEmail" name="manager_email" placeholder="Enter Manager Email" required>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

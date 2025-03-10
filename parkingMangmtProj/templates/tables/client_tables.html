@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Clients Management{% endblock %}
+
+{% block content %}
+<!-- Content Wrapper -->
+<div class="content-wrapper">
+    <!-- Content Header -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Clients Management</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">Clients</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Table for All Clients -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">All Clients</h3>
+                        </div>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Vehicle Number Plate</th>
+                                        <th>Contact Info</th>
+                                        <th>Branch</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for client in all_clients %}
+                                    <tr>
+                                        <td>{{ client.id }}</td>
+                                        <td>{{ client.name }}</td>
+                                        <td>{{ client.vehicle_number_plate }}</td>
+                                        <td>{{ client.contact_info }}</td>
+                                        <td>{{ client.branch.branch_name }}</td>
+                                        <td>
+                                            <!-- Delete Button -->
+                                            <form action="{% url 'delete-client' client.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this client?')">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6">No clients found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table for Clients by Branch -->
+            {% for branch in branches_with_clients %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Clients for {{ branch.branch_name }}</h3>
+                        </div>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Vehicle Number Plate</th>
+                                        <th>Contact Info</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for client in branch.clients.all %}
+                                    <tr>
+                                        <td>{{ client.id }}</td>
+                                        <td>{{ client.name }}</td>
+                                        <td>{{ client.vehicle_number_plate }}</td>
+                                        <td>{{ client.contact_info }}</td>
+                                        <td>
+                                            {% if client.ticket.is_cleared %}
+                                                <form action="{% url 'delete-client' client.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this client?')">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                </form>
+                                            {% else %}
+                                                <button class="btn btn-sm btn-secondary" disabled>Ticket Not Cleared</button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5">No clients found for this branch.</td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

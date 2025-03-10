@@ -1,0 +1,123 @@
+{% extends 'auth/base2.html' %}
+
+{% block title %}Parking Management - Register{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background-color: #f4f6f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .register-box {
+    width: 400px;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  .register-logo a {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-control {
+    height: 45px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding-left: 40px;
+  }
+
+  .input-group {
+    position: relative;
+  }
+
+  .input-group i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+  }
+
+  .btn-register {
+    width: 100%;
+    height: 45px;
+    font-size: 18px;
+    background: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    transition: 0.3s;
+  }
+
+  .btn-register:hover {
+    background: #0056b3;
+  }
+
+  .register-links {
+    margin-top: 15px;
+  }
+
+  .register-links a {
+    text-decoration: none;
+    color: #007bff;
+  }
+
+  .register-links a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="register-box">
+  {% include 'SpecificBranch/messages.html' %}
+  <div class="register-logo">
+    <a href="#"><i class="fas fa-parking"></i> Create an Account</a>
+  </div>
+
+  <p class="register-box-msg">Sign up to start using the system</p>
+
+  <form method="post" action="{% url 'register' %}">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="form-group input-group">
+      <i class="fas fa-user"></i>
+      {{ form.username }}
+    </div>
+    
+    <div class="form-group input-group">
+      <i class="fas fa-envelope"></i>
+      {{ form.email }}
+    </div>
+
+    <div class="form-group input-group">
+      <i class="fas fa-lock"></i>
+      {{ form.password1 }}
+    </div>
+
+    <div class="form-group input-group">
+      <i class="fas fa-lock"></i>
+      {{ form.password2 }}
+    </div>
+
+    <button type="submit" class="btn btn-register">Register</button>
+  </form>
+
+  <div class="register-links">
+    <p><a href="{% url 'loginpage' %}">I already have an account</a></p>
+  </div>
+</div>
+{% endblock %}

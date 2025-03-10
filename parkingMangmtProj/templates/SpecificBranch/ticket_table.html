@@ -1,0 +1,412 @@
+{% extends 'SpecificBranch/base2.html' %}
+{% block title %}{{ branch.branch_name }} Ticket Table{% endblock %}
+
+{% block content %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        {% include 'SpecificBranch/messages.html' %}
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Tickets for {{ branch.branch_name }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'branch_detail22' branch.id %}">Home</a></li>
+                        <li class="breadcrumb-item active">Ticket Table</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addClientModal">
+                Add Client
+            </button>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addParkingRateModal">
+                Add Parking Rates
+            </button>
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#addParkingSlotModal">
+                Add Parking Slot
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tickets for {{ branch.branch_name }}</h3>
+                        <div class="mb-3 text-right">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Search..." style="width: 200px; display: inline-block;">
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Number Plate</th>
+                                    <th>Location</th>
+                                    <th>Registration Time</th>
+                                    <th>Exit Time</th>
+                                    <th>Duration</th>
+                                    <th>Branch Name</th>
+                                    <th>Parking Slot</th>
+                                    <th>Total Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Tickets without exit time (not cleared) -->
+                                {% for ticket in tickets %}
+                                    {% if not ticket.exit_time %}
+                                        <tr>
+                                            <td>{{ ticket.id }}</td>
+                                            <td>{{ ticket.client.vehicle_number_plate }}</td>
+                                            <td>{{ ticket.branch.location }}</td>
+                                            <td>{{ ticket.entry_time|date:"Y-m-d H:i:s" }}</td>
+                                            <td>Not Cleared Yet</td>
+                                            <td>No exit time set</td>
+                                            <td>{{ ticket.branch.branch_name }}</td>
+                                            <td>{{ ticket.parking_slot.slot_number }}</td>
+                                            <td>No total amount set</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-success" onclick="checTicket('{{ ticket.id }}', '{{ ticket.branch.id }}')">Clear</button>
+                                                <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-sm btn-warning">Download</a>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- Tickets with exit time (cleared) -->
+                                {% for ticket in tickets %}
+                                    {% if ticket.exit_time %}
+                                        <tr>
+                                            <td>{{ ticket.id }}</td>
+                                            <td>{{ ticket.client.vehicle_number_plate }}</td>
+                                            <td>{{ ticket.branch.location }}</td>
+                                            <td>{{ ticket.entry_time|date:"Y-m-d H:i:s" }}</td>
+                                            <td>{{ ticket.exit_time|date:"Y-m-d H:i:s" }}</td>
+                                            <td>{{ ticket.duration }} minutes</td>
+                                            <td>{{ ticket.branch.branch_name }}</td>
+                                            <td>{{ ticket.parking_slot.slot_number }}</td>
+                                            <td>{{ ticket.fee_to_pay }}</td>
+                                            <td>
+                                                <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-sm btn-warning">Download</a>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- If no tickets exist -->
+                                {% if not tickets %}
+                                    <tr>
+                                        <td colspan="11" class="text-center">No tickets available for this branch.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+</section>
+<!-- /.content -->
+</div>
+
+<!-- Add Client Modal -->
+<div class="modal fade" id="addClientModal" tabindex="-1" role="dialog" aria-labelledby="addClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClientModalLabel">Register Client</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Django form for client registration -->
+                <form method="post" action="{% url 'register_client' branch.id %}" onsubmit="return validateNumberPlate();">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="vehicleNumber">Vehicle Number Plate</label>
+                        <input type="text" class="form-control" id="vehicleNumber" name="vehicle_number"
+                            placeholder="Enter Vehicle Number Plate (e.g., UG 123X, USB 123T)" 
+                            required 
+                            pattern="[A-Z]+ [0-9]+[A-Z]?"
+                            title="Format: Capital letters, space, numbers, and optional capital letter at the end."
+                            oninput="this.value = this.value.toUpperCase();">
+                        <small class="form-text text-muted">Format: UG 123X, USB 123T</small>
+                    </div>
+                    <input type="hidden" name="branch" value="{{ branch.id }}">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Register Client</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Parking Rates Modal -->
+<div class="modal fade" id="addParkingRateModal" tabindex="-1" role="dialog" aria-labelledby="addParkingRateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addParkingRateModalLabel">Add Parking Rates</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Django form for adding parking rates -->
+                <form method="post" action="{% url 'add_parking_rate' branch.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="rateType">Rate Type</label>
+                        <select class="form-control" id="rateType" name="rate_type" required>
+                            <option value="hourly">Hourly</option>
+                            <option value="daily">Daily</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rateValue">Rate Value</label>
+                        <input type="number" class="form-control" id="rateValue" name="rate_value" placeholder="Enter Rate Value" required>
+                    </div>
+                    <input type="hidden" name="branch" value="{{ branch.id }}">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Rate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Parking Slot Modal -->
+<div class="modal fade" id="addParkingSlotModal" tabindex="-1" role="dialog" aria-labelledby="addParkingSlotModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addParkingSlotModalLabel">Add Parking Slot</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Django form for adding a parking slot -->
+                <form method="post" action="{% url 'add_parking_slot' branch.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="slotNumber">Parking Slot Number</label>
+                        <input type="text" class="form-control" id="slotNumber" name="slot_number" placeholder="Enter Parking Slot Number" required>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="isAvailable" name="is_available" checked>
+                        <label class="form-check-label" for="isAvailable">Is Available</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Parking Slot</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Confirmation Modal -->
+<div class="modal fade" id="paymentConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="paymentConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentConfirmationModalLabel">Confirm Payment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentConfirmationForm" method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" id="ticketId" name="ticket_id">
+                    <input type="hidden" id="branchId" name="branch_id">
+                    <div class="form-group">
+                        <label for="amount">Amount to Pay</label>
+                        <input type="text" class="form-control" id="amount" name="amount" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method</label>
+                        <select class="form-control" id="payment_method" name="payment_method" required>
+                            <option value="cash">Cash</option>
+                            <option value="bank">Bank</option>
+                            <option value="mobile_money">Mobile Money</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" form="paymentConfirmationForm" class="btn btn-primary">Confirm Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination-controls">
+    <button id="prevPage" class="btn btn-primary">Previous</button>
+    <span id="pageInfo"></span>
+    <button id="nextPage" class="btn btn-primary">Next</button>
+</div>
+
+
+
+<style>
+    .pagination-controls {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .pagination-controls button {
+        margin: 0 5px;
+    }
+
+    .pagination-controls span {
+        margin: 0 10px;
+        font-weight: bold;
+    }
+</style>
+
+{% endblock %}
+
+{% block JavaScript %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rowsPerPage = 3;
+        const rows = document.querySelectorAll('.table tbody tr');
+        const pageInfo = document.getElementById('pageInfo');
+        const prevPageButton = document.getElementById('prevPage');
+        const nextPageButton = document.getElementById('nextPage');
+        let currentPage = 1;
+
+        function showPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? '' : 'none';
+            });
+
+            pageInfo.textContent = `Page ${page} of ${Math.ceil(rows.length / rowsPerPage)}`;
+            prevPageButton.disabled = page === 1;
+            nextPageButton.disabled = page === Math.ceil(rows.length / rowsPerPage);
+        }
+
+        prevPageButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        nextPageButton.addEventListener('click', () => {
+            if (currentPage < Math.ceil(rows.length / rowsPerPage)) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        // Initial page load
+        showPage(currentPage);
+    });
+</script>
+<script>
+    function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+function checTicket(ticketId, branchId) {
+    let csrftoken = getCSRFToken();
+
+    let data = JSON.stringify({
+        ticket_id: parseInt(ticketId),
+        branch_id: parseInt(branchId)
+    });
+
+    $.ajax({
+        url: '{% url "clear_tickets" %}',
+        type: 'POST',
+        contentType: 'application/json',
+        headers: { "X-CSRFToken": csrftoken },
+        data: data,
+        success: function(response) {
+            console.log("Success:", response);
+
+            // Populate the modal
+            document.getElementById('ticketId').value = response.ticket_id;
+            document.getElementById('branchId').value = response.branch_id;
+            document.getElementById('amount').value = response.fee_to_pay;
+
+            // Set the form action URL
+            const form = document.getElementById('paymentConfirmationForm');
+            form.action = `/ticket/${response.ticket_id}/branch/${response.branch_id}/confirm-payment/`;
+
+            // Open the modal
+            if (typeof $.fn.modal !== "undefined") {
+                $('#paymentConfirmationModal').modal('show');
+            } else {
+                var myModal = new bootstrap.Modal(document.getElementById('paymentConfirmationModal'));
+                myModal.show();
+            }
+
+            // Automatically download the PDF receipt
+            window.location.href = `/ticket/${response.ticket_id}/download/`;
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", xhr.responseText);
+            alert("An error occurred while clearing the ticket.");
+        }
+    });
+}
+    // Ensure jQuery and Bootstrap are loaded
+    $(document).ready(function () {
+        console.log("jQuery Version:", jQuery.fn.jquery);
+        console.log("Bootstrap Modal Exists:", typeof $.fn.modal !== "undefined");
+    });
+
+
+    $(document).ready(function() {
+    $('#searchInput').on('keyup', function() {
+        let value = $(this).val().toLowerCase();
+        $('.table tbody tr').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+});
+
+
+function validateNumberPlate() {
+    let plate = document.getElementById("vehicleNumber").value.toUpperCase().trim();
+    
+    // Updated regex: Starts and ends with a capital letter, contains at least one number
+    let pattern = /^[A-Z]+ [0-9]+[A-Z]?$/; 
+
+    if (!pattern.test(plate)) {
+        alert("Invalid vehicle number plate format! Ensure it starts and ends with a capital letter and contains numbers.");
+        return false; // Prevent form submission
+    }
+    return true;
+}
+
+</script>
+{% endblock  %}

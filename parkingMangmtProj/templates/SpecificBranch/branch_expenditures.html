@@ -1,0 +1,255 @@
+{% extends 'SpecificBranch/base2.html' %}
+{% block title %}{{ branch.branch_name }} Expenditures{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    {% include 'SpecificBranch/messages.html' %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>{{ branch.branch_name }} Expenditures</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'branch_detail22' branch.id %}">Home</a></li>
+                        <li class="breadcrumb-item active">Expenses</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Current Balances Section -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Current Balances</h3>
+                            <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#updateBalancesModal">
+                                Update Balances
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Cash Balance -->
+                                <div class="col-md-4">
+                                    <div class="info-box bg-success">
+                                        <span class="info-box-icon"><i class="fas fa-wallet"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Cash Balance</span>
+                                            <span class="info-box-number">Ugx{{ balances.cash }}</span>
+                                        </div>
+                                    </div>
+                                    {% if balances.cash < 0 %}
+                                    <div class="alert alert-danger mt-2">
+                                        <i class="fas fa-exclamation-circle"></i> Items were received on credit due to insufficient cash balance.
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <!-- Bank Balance -->
+                                <div class="col-md-4">
+                                    <div class="info-box bg-primary">
+                                        <span class="info-box-icon"><i class="fas fa-university"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Bank Balance</span>
+                                            <span class="info-box-number">Ugx{{ balances.bank }}</span>
+                                        </div>
+                                    </div>
+                                    {% if balances.bank < 0 %}
+                                    <div class="alert alert-danger mt-2">
+                                        <i class="fas fa-exclamation-circle"></i> Items were received on credit due to insufficient bank balance.
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <!-- Mobile Money Balance -->
+                                <div class="col-md-4">
+                                    <div class="info-box bg-warning">
+                                        <span class="info-box-icon"><i class="fas fa-mobile-alt"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Mobile Money</span>
+                                            <span class="info-box-number">Ugx{{ balances.mobile_money }}</span>
+                                        </div>
+                                    </div>
+                                    {% if balances.mobile_money < 0 %}
+                                    <div class="alert alert-danger mt-2">
+                                        <i class="fas fa-exclamation-circle"></i> Items were received on credit due to insufficient mobile money balance.
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Expense and Cart Section -->
+            <div class="row">
+                <!-- Add Expense Form (Left Column) -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Add Expense</h3>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'add_to_cart' branch.id %}" id="expenseForm">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="category">Category</label>
+                                            <select class="form-control category-select" name="category" required>
+                                                <option value="">Select Category</option>
+                                                <option value="new">Add New Category</option>
+                                                {% for category in categories %}
+                                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group new-category-input" style="display: none;">
+                                            <label for="newCategory">New Category Name</label>
+                                            <input type="text" class="form-control" name="new_category" placeholder="Enter New Category">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="item_name">Item Name</label>
+                                            <input type="text" class="form-control" name="item_name" placeholder="Item Name" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="quantity">Quantity</label>
+                                            <input type="number" class="form-control" name="quantity" placeholder="Quantity" required min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="price_per_item">Price per Item</label>
+                                            <input type="number" class="form-control" name="price_per_item" placeholder="Price per Item" required min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success btn-block">Add to Cart</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Section (Right Column) -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Cart</h3>
+                        </div>
+                        <div class="card-body">
+                            {% if cart_items %}
+                                <!-- Table for Cart Items -->
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Quantity</th>
+                                                <th>Price per Item</th>
+                                                <th>Total</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in cart_items %}
+                                                <tr>
+                                                    <td>{{ item.item_name }}</td>
+                                                    <td>{{ item.quantity }}</td>
+                                                    <td>Ugx {{ item.price_per_item }}</td>
+                                                    <td class="item-total">Ugx {{ item.total_cost }}</td>
+                                                    <td>
+                                                        <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-sm btn-danger">
+                                                            <i class="fas fa-trash"></i> Remove
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Total Cost Display -->
+                                <h4>Total: Ugx <span id="total-cost">{{ total_cost }}</span></h4>
+
+                                <!-- Checkout Form -->
+                                <form method="post" action="{% url 'checkout_cart' branch.id %}" class="mt-3">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="payment_method">Payment Method</label>
+                                        <select class="form-control" name="payment_method" required>
+                                            {% for method in payment_methods %}
+                                                <option value="{{ method }}">{{ method|title }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-check"></i> Checkout
+                                    </button>
+                                </form>
+                            {% else %}
+                                <!-- Empty Cart Message -->
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> No items in the cart.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- JavaScript for Dynamic Functionality -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Show/Hide New Category Input
+        $(".category-select").change(function() {
+            const newCategoryInput = $(this).closest(".row").find(".new-category-input");
+            if ($(this).val() === "new") {
+                newCategoryInput.show();
+            } else {
+                newCategoryInput.hide();
+            }
+        });
+
+        // Search functionality
+        $('#searchInput').on('keyup', function() {
+            const value = $(this).val().toLowerCase(); // Get the search input value
+            $('table tbody tr').filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1); // Show/hide rows based on search input
+            });
+        });
+    });
+
+    // Calculate the total cost dynamically
+    document.addEventListener("DOMContentLoaded", function() {
+        function calculateTotal() {
+            let totalCost = 0;
+            document.querySelectorAll(".item-total").forEach(item => {
+                const totalText = item.innerText.replace("Ugx ", ""); // Remove "Ugx" prefix
+                totalCost += parseFloat(totalText) || 0; // Convert to number and add to total
+            });
+            document.getElementById("total-cost").innerText = totalCost.toFixed(2); // Update the total cost display
+        }
+        calculateTotal(); // Calculate the total when the page loads
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,7 @@
+echo ".env" >> .gitignore
+echo "file" >> .gitignore
+
+echo "node_modules/" >> .gitignore
+echo "dist/" >> .gitignore
+db.json >> .gitignore
+

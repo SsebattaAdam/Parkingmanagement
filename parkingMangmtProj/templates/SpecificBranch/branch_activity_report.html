@@ -1,0 +1,188 @@
+{% extends 'SpecificBranch/base2.html' %}
+{% block title %}{{ branch.branch_name }} - Activity Report{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    {% include 'SpecificBranch/messages.html' %}
+    <section class="content-header">
+        <h1>Activity Report - {{ branch.branch_name }}</h1>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Export Buttons -->
+            <div class="mb-3">
+                <div class="row align-items-center">
+                    <!-- Export to CSV Button -->
+                    <div class="col-auto">
+                        <a href="{% url 'export_branch_csv' branch.id %}" class="btn btn-success">Export to CSV</a>
+                    </div>
+
+                    <!-- Export to PDF Form -->
+                    <div class="col-auto">
+                        <form method="GET" action="{% url 'export_branch_pdf' branch.id %}" class="form-inline" id="exportPdfForm">
+                            <div class="form-group mr-2">
+                                <label for="start_date" class="mr-2">Start Date:</label>
+                                <input type="date" name="start_date" id="start_date" class="form-control" required>
+                            </div>
+                            <div class="form-group mr-2">
+                                <label for="end_date" class="mr-2">End Date:</label>
+                                <input type="date" name="end_date" id="end_date" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Export to PDF</button>
+                        </form>
+                        <div id="dateError" class="text-danger mt-2" style="display: none;">End date must be greater than or equal to the start date.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Table -->
+            <div class="card">
+                <div class="mb-3 text-right">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search..." style="width: 200px; display: inline-block;">
+                </div>
+                <div class="card-body">
+                    <table id="activityTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in activities|slice:":5" %}
+                            <tr>
+                                <td>{{ activity.timestamp }}</td>
+                                <td>{{ activity.user }}</td>
+                                <td>{{ activity.details }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                 
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination">
+                    {% if activities.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ activities.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+
+                    <li class="page-item disabled"><a class="page-link">Page {{ activities.number }} of {{ activities.paginator.num_pages }}</a></li>
+
+                    {% if activities.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ activities.next_page_number }}">Next</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ activities.paginator.num_pages }}">Last</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </section>
+</div>
+
+<!-- JavaScript for Show More/Show Less Functionality -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let page = 2; // Start from the second page of activities
+        const activities = [
+            {% for activity in activities %}
+                {
+                    timestamp: "{{ activity.timestamp }}",
+                    user: "{{ activity.user }}",
+                    activity_type: "{{ activity.activity_type }}",
+                    details: "{{ activity.details }}"
+                },
+            {% endfor %}
+        ];
+
+        // Show More Button
+        $("#showMoreBtn").click(function() {
+            const startIndex = (page - 1) * 5; // Load 5 more activities
+            const endIndex = startIndex + 5;
+
+            for (let i = startIndex; i < endIndex && i < activities.length; i++) {
+                const activity = activities[i];
+                $("#activityTable tbody").append(`
+                    <tr>
+                        <td>${activity.timestamp}</td>
+                        <td>${activity.user}</td>
+                        <td>${activity.activity_type}</td>
+                        <td>${activity.details}</td>
+                    </tr>
+                `);
+            }
+
+            page++;
+
+            // Hide the "Show More" button if all activities are loaded
+            if (endIndex >= activities.length) {
+                $("#showMoreBtn").hide();
+            }
+
+            // Show the "Show Less" button
+            $("#showLessBtn").show();
+        });
+
+        // Show Less Button
+        $("#showLessBtn").click(function() {
+            // Remove all rows except the first 5
+            $("#activityTable tbody tr:gt(4)").remove();
+
+            // Reset the page counter
+            page = 2;
+
+            // Show the "Show More" button
+            $("#showMoreBtn").show();
+
+            // Hide the "Show Less" button
+            $("#showLessBtn").hide();
+        });
+    });
+
+    // Search Functionality
+    $(document).ready(function() {
+        $('#searchInput').on('keyup', function() {
+            let value = $(this).val().toLowerCase();
+            $('#activityTable tbody tr').filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+
+    // Date Range Validation
+    $(document).ready(function() {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const dateError = document.getElementById('dateError');
+        const exportPdfForm = document.getElementById('exportPdfForm');
+
+        exportPdfForm.addEventListener('submit', function(event) {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+
+            if (endDate < startDate) {
+                event.preventDefault(); // Prevent form submission
+                dateError.style.display = 'block'; // Show error message
+            } else {
+                dateError.style.display = 'none'; // Hide error message
+            }
+        });
+
+        // Update end date min value when start date changes
+        startDateInput.addEventListener('change', function() {
+            endDateInput.min = startDateInput.value;
+        });
+
+        // Update start date max value when end date changes
+        endDateInput.addEventListener('change', function() {
+            startDateInput.max = endDateInput.value;
+        });
+    });
+</script>
+{% endblock %}

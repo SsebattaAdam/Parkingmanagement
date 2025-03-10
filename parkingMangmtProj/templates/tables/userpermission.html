@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}User Permissions{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>User Permissions</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">User Permissions</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Manage User Permissions</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>View Reports</th>
+                                    <th>Manage Branches</th>
+                                    <th>Issue Tickets</th>
+                                    <th>Register Clients</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.get_role_display }}</td>  <!-- Display the role name -->
+                                    <td><input type="checkbox" name="can_view_reports" {% if user.userpermission.can_view_reports %}checked{% endif %}></td>
+                                    <td><input type="checkbox" name="can_manage_branches" {% if user.userpermission.can_manage_branches %}checked{% endif %}></td>
+                                    <td><input type="checkbox" name="can_issue_tickets" {% if user.userpermission.can_issue_tickets %}checked{% endif %}></td>
+                                    <td><input type="checkbox" name="can_register_clients" {% if user.userpermission.can_register_clients %}checked{% endif %}></td>
+                                    <td>
+                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function getCSRFToken() {
+        return document.querySelector("[name=csrfmiddlewaretoken]").value;
+    }
+
+    fetch("your-api-url", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({data: "example"})
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,296 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{%block title%} welcome{% endblock title%}</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  
+  
+
+  <!-- Google Font: Source Sans Pro -->
+   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <!-- Bootstrap Color Picker -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css' %}">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <!-- JQVMap -->
+  <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+  <!-- Bootstrap4 Duallistbox -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css' %}">
+  <!-- BS Stepper -->
+  <link rel="stylesheet" href="{% static 'plugins/bs-stepper/css/bs-stepper.min.css' %}">
+  <!-- dropzonejs -->
+  <link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+  <!-- summernote -->
+  <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    
+  </div>
+
+ 
+
+   <!-- Main Sidebar Container -->
+   <aside class="main-sidebar sidebar-white elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link">
+      <span class="brand-text font-weight-light">{{ branch.branch_name }}</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel -->
+ 
+    <!-- Sidebar Menu -->
+    <!-- Sidebar Menu -->
+    <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Sidebar items -->
+          <li class="nav-item">
+            <a href="{% url 'branch_detail22' branch.id %}" class="nav-link">
+              <i class="nav-icon fas fa-save"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-building"></i>
+              <p>
+                Tickets
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+         
+              <li class="nav-item">
+                <a href="{% url 'branc_ticket_table' branch.id %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>View Tickets</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+      
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-code-branch"></i>
+              <p>
+                Parking Slots
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+          
+              <li class="nav-item">
+                <a href="{% url 'view_parking_slots' branch.id %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>View Available Slots</p>
+                </a>
+              </li>
+            
+            </ul>
+          </li>
+      
+       
+      
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-ticket-alt"></i>
+              <p>
+                Clients
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            
+           
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'clients_by_branch' branch.id %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>View Clients</p>
+                </a>
+              </li>
+              
+            </ul>
+          </li>
+      
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              
+              <i class="nav-icon fas fa-user"></i>
+              <p>
+                Expenses
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'branch_expenditures' branch.id %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Add Expense</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a href="{% url 'branch_recent_expenses' branch.id %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Resent Expenses</p>
+                </a>
+              </li>
+           
+            </ul>
+          </li>
+
+         
+              
+          <li class="nav-item">
+            <a href="{% url 'branch_activity_report' branch.id %}" class="nav-link">
+              <i class="nav-icon fas fa-chart-line"></i>
+              <p>Reports</p>
+            </a>
+          </li>
+              
+         
+          
+          
+      
+         
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-sign-out-alt"></i>
+              <p>Log out</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+      
+      
+      
+<!-- /.sidebar-menu -->
+
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+  <main>
+  
+
+
+        {% block content %}
+
+
+        
+        {% endblock %}
+    </main>
+ <!-- jQuery -->
+ <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+ <!-- jQuery UI 1.11.4 -->
+ <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+ <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+ <script>
+   $.widget.bridge('uibutton', $.ui.button)
+ </script>
+ <!-- Bootstrap 4 -->
+ <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+ <!-- ChartJS -->
+ <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+ <!-- Sparkline -->
+ <script src="{% static 'plugins/sparklines/sparkline.js' %}"></script>
+ <!-- JQVMap -->
+ <script src="{% static 'plugins/jqvmap/jquery.vmap.min.js' %}"></script>
+ <script src="{% static 'plugins/jqvmap/maps/jquery.vmap.usa.js' %}"></script>
+ <!-- jQuery Knob Chart -->
+ <script src="{% static 'plugins/jquery-knob/jquery.knob.min.js' %}"></script>
+ <!-- daterangepicker -->
+ <script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+ <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+ <!-- Tempusdominus Bootstrap 4 -->
+ <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+ <!-- Summernote -->
+ <script src="{% static 'plugins/summernote/summernote-bs4.min.js' %}"></script>
+ <!-- overlayScrollbars -->
+ <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+ <!-- AdminLTE App -->
+ <script src="{% static 'dist/js/adminlte.js' %}"></script>
+ <!-- AdminLTE for demo purposes -->
+
+ <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+ <script src="{% static 'dist/js/pages/dashboard.js' %}"></script>
+
+
+ <!-- new links  -->
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Bootstrap JS (Make sure this is included AFTER jQuery) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Add jQuery and AJAX to handle the "Clear" button click -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+  $('.clear-ticket-btn').on('click', function() {
+    var ticketId = $(this).data('ticket-id');
+    
+    // Make AJAX call to clear the ticket
+    $.ajax({
+      url: '{% url "clear_ticket" 0 %}'.replace('0', ticketId),
+      type: 'POST',
+      data: {
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      },
+      success: function(response) {
+        // Update the ticket information in the table
+        $('#exit-time-' + ticketId).text(response.exit_time);
+        $('#duration-' + ticketId).text(response.duration + ' hours');
+
+        // Show the calculated fee (you can display this in a modal or anywhere else)
+        alert('Fee to pay: ' + response.fee);
+
+        // Optionally, update the parking slot status
+        $('#ticket-' + ticketId).find('td').last().html('Cleared');
+      },
+      error: function() {
+        alert('Error clearing the ticket.');
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
+{% block JavaScript %}
+
+{% endblock %}

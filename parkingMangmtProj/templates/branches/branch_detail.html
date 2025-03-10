@@ -1,0 +1,161 @@
+
+{% extends 'base.html' %}
+
+
+{% block title %}{{ branch.branch_name }} Details{% endblock %}
+
+{% block content %}
+{% include 'forms/client_pop_up_form.html' %}
+{% include 'forms/parking_slot_pop_up_from.html' %}
+{% include 'forms/ticket_pop_up_form.html' %}
+{% include 'forms/manually.html' %}
+{% include 'tables/viewing_rates.html' %}
+{% include 'tables/adding_rate.html' %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">{{ branch.branch_name }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">{{ branch.branch_name }} Details</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+         <!-- Action Cards -->
+<div class="row">
+    <!-- Tickets -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>Tickets</h3>
+                <h6>Total tickets available: {{ total_tickets }}</h6>
+            </div>
+            <div class="icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <a href="#" class="small-box-footer">Manage Tickets <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <!-- Parking Slots -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>Slots</h3>
+                <h6>Total Slots available: {{ total_slots }}</h6>
+                <h6>Available Slots: {{ total_available_slots }}</h6>
+            </div>
+            <div class="icon">
+                <i class="fas fa-parking"></i>
+            </div>
+            <a href="#" class="small-box-footer">Manage Slots <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <!-- Clients -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>Clients</h3>
+                <h6>Total Clients: {{ total_clients }}</h6>
+            </div>
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <a href="#" class="small-box-footer">Manage Clients <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <!-- Payments -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>Payments</h3>
+                <h6>Total Payments Made: {{ total_payments }}</h6>
+            </div>
+            <div class="icon">
+                <i class="fas fa-money-check-alt"></i>
+            </div>
+            <a href="#" class="small-box-footer">Manage Payments <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+<!-- /.row -->
+
+            <!-- Detailed Sections -->
+            <div class="row">
+                <div class="col-12">
+                    <h2>Details for {{ branch.branch_name }}</h2>
+                    <p>Below, you can manage all aspects of this branch.</p>
+                </div>
+
+            <!-- Tickets Section -->
+<div class="col-12">
+    <div class="card">
+      <div class="card-header bg-info">
+        <h3 class="card-title">Tickets</h3>
+      </div>
+      <div class="card-body">
+        <a href="#" class="btn btn-secondary" data-toggle="modal" data-target="#ticketModal">Generate Tickets Manually</a>
+        <a href="#" class="btn btn-secondary" data-toggle="modal" data-target="#viewTicketsModal">View Tickets In Table</a>
+      </div>
+    </div>
+  </div>
+                <!-- Parking Slots Section -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-success">
+                            <h3 class="card-title">Parking Slots</h3>
+                        </div>
+                        <div class="card-body">
+                            <a href="#" class="btn btn-info" data-toggle="modal" data-target="#parkingSlotModal">Add Parking Slot</a>
+                            <a href="#" class="btn btn-secondary">View Slots</a>
+                        </div>
+                    </div>
+                </div>
+
+
+                           <!-- Clients Section -->
+<div class="col-12">
+    <div class="card">
+        <div class="card-header bg-warning">
+            <h3 class="card-title">Clients</h3>
+        </div>
+        <div class="card-body">
+            <!-- Button to trigger the modal -->
+            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#clientModal">Register Client</a>
+            <a href="#" class="btn btn-secondary">View Clients</a>
+        </div>
+    </div>
+</div>
+
+
+              <!-- Rate Section Section -->
+<div class="col-12">
+    <div class="card">
+        <div class="card-header bg-danger">
+            <h3 class="card-title">Define Parking Rates</h3>
+        </div>
+        <div class="card-body">
+            <!-- Button to open the Add Rate Modal -->
+            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#addRateModal">Add Parking Rates</a>
+            <a href="#" class="btn btn-secondary" data-toggle="modal" data-target="#viewRatesModal">View Available Rates</a>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+{% endblock %}

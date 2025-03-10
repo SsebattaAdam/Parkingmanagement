@@ -1,0 +1,63 @@
+{% extends 'SpecificBranch/base.html' %}
+
+{% block title %}Branch Name Details{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Branches</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Log Out</a></li>
+                        <li class="breadcrumb-item active">Branches</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Branch Boxes -->
+            <div class="row">
+                {% if branches %}
+                    {% for branch in branches %}
+                    <div class="col-lg-6 col-12">
+                        <div class="small-box {% if branch.is_active %}bg-info{% else %}bg-danger{% endif %}">
+                            <div class="inner">
+                                <h3>{{ branch.branch_name }}</h3>
+                                <p>Location: {{ branch.location }}</p>
+                                <p>Contact: {{ branch.contact_number }}</p>
+                                <p>Status: 
+                                    {% if branch.is_active %}
+                                        Active
+                                    {% else %}
+                                        Inactive
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-branch"></i>
+                            </div>
+                            <a href="{% url 'branch_detail22' branch.id %}" class="small-box-footer">
+                                More info <i class="fas fa-arrow-circle-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No branches assigned to you.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'SpecificBranch/base2.html' %}
+{% block title %}{{ branch.branch_name }} Parking Slots{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    {% include 'SpecificBranch/messages.html' %}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Parking Slots for {{ branch.branch_name }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'branch_detail22' branch.id %}">Home</a></li>
+                        <li class="breadcrumb-item active">View Parking Slots</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Add Parking Slot Button -->
+            <div class="mb-3">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addParkingSlotModal">
+                    Add Parking Slot
+                </button>
+            </div>
+
+            <!-- Parking Slots Grid -->
+            <div class="row">
+                {% for slot in parking_slots %}
+                    <div class="col-md-3 col-sm-6 col-12"> <!-- Adjust columns for responsiveness -->
+                        <div class="card parking-slot-card {% if slot.is_available %}available{% else %}occupied{% endif %}">
+                            <div class="card-body">
+                                <div class="slot-content">
+                                    {% if not slot.is_available %}
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Red_car.png" 
+                                             alt="Car in Slot" class="car-image">
+                                    {% else %}
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/White_car_icon.svg/1024px-White_car_icon.svg.png" 
+                                             alt="Available Slot" class="car-image">
+                                    {% endif %}
+                                    <p class="slot-label">Slot {{ slot.slot_number }}</p>
+                                    <p class="slot-status">
+                                        {% if slot.is_available %}
+                                            Available
+                                        {% else %}
+                                            Occupied
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Add Parking Slot Modal -->
+<div class="modal fade" id="addParkingSlotModal" tabindex="-1" role="dialog" aria-labelledby="addParkingSlotModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addParkingSlotModalLabel">Add Parking Slot</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Django form for adding a parking slot -->
+                <form method="post" action="{% url 'add_parking_slot' branch.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="slotNumber">Parking Slot Number</label>
+                        <input type="text" class="form-control" id="slotNumber" name="slot_number" placeholder="Enter Parking Slot Number" required>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="isAvailable" name="is_available" checked>
+                        <label class="form-check-label" for="isAvailable">Is Available</label>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Parking Slot</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Card-based parking slot */
+    .parking-slot-card {
+        margin-bottom: 15px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .parking-slot-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Available slot */
+    .available {
+        border-color: #28a745; /* Green border for available slots */
+        background: repeating-linear-gradient(
+            to bottom,
+            #f8f9fa, /* Light gray background */
+            #f8f9fa 20px,
+            #e9ecef 21px,
+            #e9ecef 22px
+        ); /* White parking lines */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Add parking lines to available slots */
+    .available::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 4px;
+        height: 100%;
+        background: repeating-linear-gradient(
+            to bottom,
+            transparent,
+            transparent 20px,
+            #ccc 21px,
+            #ccc 22px
+        );
+        transform: translateX(-50%);
+    }
+
+    /* Occupied slot */
+    .occupied {
+        border-color: #dc3545; /* Red border for occupied slots */
+        background-color: #ffebee; /* Light red background */
+    }
+
+    /* Slot content */
+    .slot-content {
+        text-align: center;
+        padding: 15px;
+        position: relative;
+        z-index: 1; /* Ensure content is above the parking lines */
+    }
+
+    /* Car Image */
+    .car-image {
+        width: 80px; /* Slightly larger car image */
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    /* Slot label */
+    .slot-label {
+        font-weight: bold;
+        font-size: 16px;
+        color: #333;
+        margin: 5px 0;
+    }
+
+    /* Slot status */
+    .slot-status {
+        font-size: 14px;
+        color: #666;
+        margin: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .col-md-3 {
+            flex: 0 0 50%; /* Two cards per row on tablets */
+            max-width: 50%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .col-md-3 {
+            flex: 0 0 100%; /* One card per row on mobile */
+            max-width: 100%;
+        }
+    }
+</style>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- Bootstrap JS (required for modal functionality) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

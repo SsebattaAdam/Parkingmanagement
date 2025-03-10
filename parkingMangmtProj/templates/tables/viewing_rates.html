@@ -1,0 +1,109 @@
+<!-- Modal to View Tickets -->
+<div class="modal fade" id="viewTicketsModal" tabindex="-1" role="dialog" aria-labelledby="viewTicketsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewTicketsModalLabel">Tickets for {{ branch.branch_name }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Client Name</th>
+                  <th>Location</th>
+                  <th>Contact Number</th>
+                  <th>Registration Time</th>
+                  <th>Exit Time</th>
+                  <th>Duration</th>
+                  <th>Branch Name</th>
+                  <th>Parking Slot</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ticket in tickets %}
+                  {% if ticket.branch.id == branch.id %}
+                    <tr id="ticket-{{ ticket.id }}">
+                      <td>{{ ticket.id }}</td>
+                      <td>{{ ticket.client.name }}</td>
+                      <td>{{ ticket.branch.location }}</td>
+                      <td>{{ ticket.client.contact_info }}</td>
+                      <td>{{ ticket.entry_time|date:"Y-m-d H:i:s" }}</td>
+                      <td id="exit-time-{{ ticket.id }}">
+                        {% if ticket.exit_time %}
+                          {{ ticket.exit_time|date:"Y-m-d H:i:s" }}
+                        {% else %}
+                          Not Cleared Yet
+                        {% endif %}
+                      </td>
+                      <td id="duration-{{ ticket.id }}">
+                        {% if ticket.duration %}
+                          {{ ticket.duration }} hours
+                        {% else %}
+                          <span>No exit time set</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ ticket.branch.branch_name }}</td>
+                      <td>{{ ticket.parking_slot.slot_number }}</td>
+                      <td>
+                        {% if not ticket.exit_time %}
+                          <button class="btn btn-sm btn-success clear-ticket-btn" data-ticket-id="{{ ticket.id }}">Clear</button>
+                        {% endif %}
+                        <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-sm btn-warning">Download</a>
+                      </td>
+                    </tr>
+                  {% endif %}
+                {% empty %}
+                  <tr>
+                    <td colspan="10">No tickets available for this branch.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add jQuery and AJAX to handle the "Clear" button click -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+  $(document).ready(function(){
+    $('.clear-ticket-btn').on('click', function() {
+      var ticketId = $(this).data('ticket-id');
+      
+      // Make AJAX call to clear the ticket
+      $.ajax({
+        url: '{% url "clear_ticket" 0 %}'.replace('0', ticketId),
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+        },
+        success: function(response) {
+          // Update the ticket information in the table
+          $('#exit-time-' + ticketId).text(response.exit_time);
+          $('#duration-' + ticketId).text(response.duration + ' hours');
+  
+          // Show the calculated fee (you can display this in a modal or anywhere else)
+          alert('Fee to pay: ' + response.fee);
+  
+          // Optionally, update the parking slot status
+          $('#ticket-' + ticketId).find('td').last().html('Cleared');
+        },
+        error: function() {
+          alert('Error clearing the ticket.');
+        }
+      });
+    });
+  });
+  </script>
+  

@@ -1,0 +1,115 @@
+{% extends 'SpecificBranch/base2.html' %}
+{% block title %}{{ branch.branch_name }} Expenditures{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    {% include 'SpecificBranch/messages.html' %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>{{ branch.branch_name }} Expenditures</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'branch_detail22' branch.id %}">Home</a></li>
+                        <li class="breadcrumb-item active">Expenses</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Display Expenditures Section -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Expenses</h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Date Filter and Search Input -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <input type="date" id="dateFilter" class="form-control" style="width: 200px; display: inline-block;">
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search..." style="width: 200px; display: inline-block;">
+                                </div>
+                            </div>
+
+                            <!-- Table -->
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Item</th>
+                                        <th>Quantity</th>
+                                        <th>Price per Item</th>
+                                        <th>Total</th>
+                                        <!-- <th>Actions</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody id="expenditureTableBody">
+                                    {% for expenditure in expenditures %}
+                                    <tr>
+                                        <td>{{ expenditure.date|date:"Y-m-d" }}</td>
+                                        <td>{{ expenditure.category.name }}</td>
+                                        <td>{{ expenditure.item_name }}</td>
+                                        <td>{{ expenditure.quantity }}</td>
+                                        <td>Ugx{{ expenditure.price_per_item }}</td>
+                                        <td>Ugx{{ expenditure.amount }}</td>
+                                        <td>
+                                            <!-- <a href="{% url 'edit_expenditure' expenditure.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="{% url 'delete_expenditure' expenditure.id %}" class="btn btn-sm btn-danger">Delete</a> -->
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- JavaScript for Dynamic Functionality -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Function to filter rows based on search and date
+        function filterRows() {
+            const searchValue = $('#searchInput').val().toLowerCase();
+            const selectedDate = $('#dateFilter').val();
+
+            $('#expenditureTableBody tr').each(function() {
+                const rowDate = $(this).find('td:first').text().trim(); // Get the date from the first column
+                const rowText = $(this).text().toLowerCase(); // Get all text in the row
+
+                const matchesSearch = rowText.indexOf(searchValue) > -1; // Check if row matches search
+                const matchesDate = selectedDate === '' || rowDate === selectedDate; // Check if row matches date
+
+                $(this).toggle(matchesSearch && matchesDate); // Show/hide row based on filters
+            });
+        }
+
+        // Search functionality
+        $('#searchInput').on('keyup', function() {
+            filterRows();
+        });
+
+        // Date filter functionality
+        $('#dateFilter').on('change', function() {
+            filterRows();
+        });
+    });
+</script>
+{% endblock %}
