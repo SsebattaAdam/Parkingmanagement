@@ -25,3 +25,21 @@ dist/
 # IDE-specific ignores (e.g., VS Code, PyCharm)
 .vscode/
 .idea/
+
+
+echo "*.pyc" >> .gitignore
+echo "*.pyo" >> .gitignore
+echo "__pycache__/" >> .gitignore
+echo "*.pyd" >> .gitignore
+echo "*.pdb" >> .gitignore
+echo ".env" >> .gitignore
+echo "env/" >> .gitignore
+echo "venv/" >> .gitignore
+echo "*.db" >> .gitignore
+echo "db.json" >> .gitignore
+echo "static/" >> .gitignore
+echo "node_modules/" >> .gitignore
+echo "dist/" >> .gitignore
+echo ".vscode/" >> .gitignore
+echo ".idea/" >> .gitignore
+echo "proof_of_payments/" >> .gitignore
