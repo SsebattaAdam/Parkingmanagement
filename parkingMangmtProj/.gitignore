@@ -1,7 +1,27 @@
-echo ".env" >> .gitignore
-echo "file" >> .gitignore
+# Python-specific ignores
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+*.pdb
+*.env
 
-echo "node_modules/" >> .gitignore
-echo "dist/" >> .gitignore
-db.json >> .gitignore
+# Virtual environment
+env/
+venv/
 
+# Database files
+*.db
+db.json
+
+proof_of_payments/
+
+# Node modules (if applicable)
+node_modules/
+
+# Distribution files
+dist/
+
+# IDE-specific ignores (e.g., VS Code, PyCharm)
+.vscode/
+.idea/
