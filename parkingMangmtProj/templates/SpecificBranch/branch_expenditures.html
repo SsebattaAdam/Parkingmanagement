@@ -94,6 +94,9 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Add Expense</h3>
+                            <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addCategoryModal">
+                                Add New Category
+                            </button>
                         </div>
                         <div class="card-body">
                             <form method="post" action="{% url 'add_to_cart' branch.id %}" id="expenseForm">
@@ -101,27 +104,20 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="category">Category</label>
+                                            <label for="category">Items</label>
                                             <select class="form-control category-select" name="category" required>
-                                                <option value="">Select Category</option>
-                                                <option value="new">Add New Category</option>
-                                                {% for category in categories %}
-                                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                                <option value="">Select the Items</option>
+                                                {% for item in items %}
+                                                    <option value="{{ item.id }}" data-item-name="{{ item.item_name }}">{{ item.item_name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                        <div class="form-group new-category-input" style="display: none;">
-                                            <label for="newCategory">New Category Name</label>
-                                            <input type="text" class="form-control" name="new_category" placeholder="Enter New Category">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="item_name">Item Name</label>
-                                            <input type="text" class="form-control" name="item_name" placeholder="Item Name" required>
-                                        </div>
                                     </div>
                                 </div>
+                            
+                                <!-- Hidden input to store item_name -->
+                                <input type="hidden" name="item_name" id="item_name">
+                            
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -142,6 +138,7 @@
                                     </div>
                                 </div>
                             </form>
+                            
                         </div>
                     </div>
                 </div>
@@ -185,7 +182,7 @@
                                 </div>
 
                                 <!-- Total Cost Display -->
-                                <h4>Total: Ugx <span id="total-cost">{{ total_cost }}</span></h4>
+                                <h4>Total: Ugx <span id="total-cost">{{ total_cart_cost }}</span></h4>
 
                                 <!-- Checkout Form -->
                                 <form method="post" action="{% url 'checkout_cart' branch.id %}" class="mt-3">
@@ -216,7 +213,59 @@
     </section>
 </div>
 
-<!-- JavaScript for Dynamic Functionality -->
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_category' branch.id %}" id="addCategoryForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="category_name">Category Name</label>
+                        <input type="text" class="form-control" name="category_name" placeholder="Enter Category Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="items">Items</label>
+                        <input type="text" class="form-control" name="items[]" placeholder="Enter Item Name">
+                        <button type="button" class="btn btn-secondary mt-2" id="addItemButton">Add Another Item</button>
+                    </div>
+                    <div id="additionalItems"></div>
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('addItemButton').addEventListener('click', function() {
+        const additionalItems = document.getElementById('additionalItems');
+        const newItemInput = document.createElement('div');
+        newItemInput.className = 'form-group mt-2';
+        newItemInput.innerHTML = `
+            <input type="text" class="form-control" name="items[]" placeholder="Enter Item Name">
+        `;
+        additionalItems.appendChild(newItemInput);
+    });
+
+
+      // Auto-fill hidden item_name field when category is selected
+      document.querySelector('.category-select').addEventListener('change', function() {
+        let selectedOption = this.options[this.selectedIndex];
+        let itemNameField = document.getElementById('item_name');
+        itemNameField.value = selectedOption.getAttribute('data-item-name') || '';
+    });
+</script>
+
+
+
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
@@ -237,7 +286,36 @@
                 $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1); // Show/hide rows based on search input
             });
         });
+
+
+$('#addCategoryForm').on('submit', function(e) {
+    e.preventDefault();
+
+    $.ajax({
+        type: 'POST',
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#addCategoryModal').modal('hide'); // Close the modal
+                setTimeout(function() {
+                    location.reload();  // Reload the page to show the new category
+                }, 500); // Short delay for better user experience
+            } else {
+                // Show error message inside the modal
+                $('#categoryError').text(response.error).show();
+            }
+        },
+        error: function(xhr) {
+            console.log(xhr.responseText);
+            alert('Error: Unable to add category.');
+        }
     });
+});
+
 
     // Calculate the total cost dynamically
     document.addEventListener("DOMContentLoaded", function() {

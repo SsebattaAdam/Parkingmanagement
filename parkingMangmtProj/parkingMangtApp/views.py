@@ -18,7 +18,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader
 from django.contrib.auth.decorators import login_required
-from .models import Cart, ParkingTicket, UserPermission
+from .models import Cart, ExpenditureItem, ParkingTicket, UserPermission
 from psutil import users
 from parkingMangtApp.models import Business
 from .forms import CustomUserCreationForm
@@ -912,46 +912,6 @@ def delete_user(request, user_id):
     messages.success(request, "User deleted successfully.")
     return redirect('user-tables')
 
-from django.db.models import Sum
-
-@login_required
-def branch_expenditures(request, branch_id):
-    branch = get_object_or_404(Branch, id=branch_id)
-    expenditures = Expenditure.objects.filter(branch=branch).order_by('-date')
-    categories = ExpenditureCategory.objects.all()
-    
-    # Get or create account balance for the branch
-    balances, created = AccountBalance.objects.get_or_create(branch=branch)
-
-    # Calculate total expenditure for the branch
-    total_expenditures = expenditures.aggregate(total=Sum('amount'))['total'] or 0
-
-    # Calculate remaining balance
-    remaining_balance = balances.cash + balances.bank + balances.mobile_money
-
-    # Fetch cart items for the logged-in user
-    cart_items = Cart.objects.filter(user=request.user, branch=branch)
-    
-    # Calculate the total cost from the cart
-    total_cart_cost = sum(item.total_cost() for item in cart_items)
-
-    # Available payment methods
-    payment_methods = ['cash', 'bank', 'mobile_money']
-
-    context = {
-        'branch': branch,
-        'expenditures': expenditures,
-        'categories': categories,
-        'balances': balances,
-        'total_expenditures': total_expenditures,
-        'remaining_balance': remaining_balance,
-        'cart_items': cart_items,  # Pass cart items
-        'total_cart_cost': total_cart_cost,  # Pass total cost of cart
-        'payment_methods': payment_methods,  # Pass payment methods
-    }
-    return render(request, 'SpecificBranch/branch_expenditures.html', context)
-
-
 
 @login_required
 def branch_recent_expenses(request, branch_id):
@@ -990,6 +950,40 @@ def branch_recent_expenses(request, branch_id):
     }
     return render(request, 'SpecificBranch/recent_expensetabel.html', context)
 
+from django.shortcuts import redirect
+from django.contrib import messages
+
+def add_category(request, branch_id):
+    if request.method == 'POST':
+        category_name = request.POST.get('category_name', '').strip()
+        items = request.POST.getlist('items[]')
+
+        if not category_name:
+            messages.error(request, "Category name is required.")
+            return redirect(request.META.get('HTTP_REFERER', 'branch_expenditures'))  # Redirect back
+
+        # Check if the category already exists
+        category, created = ExpenditureCategory.objects.get_or_create(
+            name=category_name, 
+            defaults={'created_by': request.user}
+        )
+
+        if not created:  # If category already exists
+            messages.error(request, "Category already exists!")
+            return redirect(request.META.get('HTTP_REFERER', 'branch_expenditures'))  # Redirect back
+
+        # Add items to the category
+        for item_name in items:
+            if item_name.strip():
+                ExpenditureItem.objects.create(category=category, item_name=item_name.strip(), created_by=request.user)
+
+        messages.success(request, "Category added successfully!")
+        return redirect(request.META.get('HTTP_REFERER', 'branch_expenditures'))  # Redirect back
+
+    messages.error(request, "Invalid request.")
+    return redirect(request.META.get('HTTP_REFERER', 'branch_expenditures'))  # Redirect back
+
+
 
 @login_required
 def add_expenditures(request, branch_id):
@@ -1027,6 +1021,46 @@ def add_expenditures(request, branch_id):
         return redirect('branch_expenditures', branch_id=branch.id)
 
     return redirect('branch_expenditures', branch_id=branch.id)
+
+@login_required
+def branch_expenditures(request, branch_id):
+    branch = get_object_or_404(Branch, id=branch_id)
+    expenditures = Expenditure.objects.filter(branch=branch).order_by('-date')
+    categories = ExpenditureCategory.objects.all()
+    items = ExpenditureItem.objects.filter(category__in=categories)
+    
+    # Get or create account balance for the branch
+    balances, created = AccountBalance.objects.get_or_create(branch=branch)
+
+    # Calculate total expenditure for the branch
+    total_expenditures = expenditures.aggregate(total=Sum('amount'))['total'] or 0
+
+    # Calculate remaining balance
+    remaining_balance = balances.cash + balances.bank + balances.mobile_money
+
+    # Fetch cart items for the logged-in user
+    cart_items = Cart.objects.filter(user=request.user, branch=branch)
+    
+    # Calculate the total cost from the cart
+    total_cart_cost = sum(item.total_cost() for item in cart_items)
+
+    # Available payment methods
+    payment_methods = ['cash', 'bank', 'mobile_money']
+
+    context = {
+        'branch': branch,
+        'expenditures': expenditures,
+        'categories': categories,
+        'items': items,
+        'balances': balances,
+        'total_expenditures': total_expenditures,
+        'remaining_balance': remaining_balance,
+        'cart_items': cart_items,
+        'total_cart_cost': total_cart_cost,
+        'payment_methods': payment_methods,
+    }
+    return render(request, 'SpecificBranch/branch_expenditures.html', context)
+
 @login_required
 def edit_expenditure(request, expenditure_id):
     expenditure = get_object_or_404(Expenditure, id=expenditure_id)
@@ -1052,16 +1086,20 @@ def add_to_cart(request, branch_id):
 
     if request.method == 'POST':
         category_id = request.POST.get('category')
-        item_name = request.POST.get('item_name')
+        item_name = request.POST.get('item_name', '').strip()  # Ensure it's not None
         quantity = int(request.POST.get('quantity', 1))
         price_per_item = Decimal(request.POST.get('price_per_item', 0))
 
+        if not item_name:  # Validate item_name
+            messages.error(request, "Item name is required.")
+            return redirect('branch_expenditures', branch_id=branch.id)
+
         if category_id == "new":
-            category_name = request.POST.get('new_category')
+            category_name = request.POST.get('new_category', '').strip()
             if category_name:
                 category, created = ExpenditureCategory.objects.get_or_create(
                     name=category_name,
-                    created_by=request.user
+                    defaults={'created_by': request.user}
                 )
             else:
                 messages.error(request, "New category name is required.")
@@ -1074,7 +1112,7 @@ def add_to_cart(request, branch_id):
             user=request.user,
             branch=branch,
             category=category,
-            item_name=item_name,
+            item_name=item_name,  # Now item_name is guaranteed to be valid
             defaults={'quantity': quantity, 'price_per_item': price_per_item}
         )
 

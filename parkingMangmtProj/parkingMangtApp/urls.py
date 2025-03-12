@@ -51,7 +51,7 @@ urlpatterns = [
      path('branch/<int:branch_id>/activity-report/', views.branch_activity_report, name='branch_activity_report'),
      path("branch/<int:branch_id>/export-csv/",views.export_branch_csv, name="export_branch_csv"),
     path("branch/<int:branch_id>/export-pdf/", views.export_branch_pdf, name="export_branch_pdf"),
-
+ path('branch/<int:branch_id>/add_category/', views.add_category, name='add_category'),
    path('ticket/<int:ticket_id>/branch/<int:branch_id>/clear/', views.clear_ticket, name='clear_ticket'),
     path('clear_tickets', views.clear_tickets, name='clear_tickets'),
     path('ticket/<int:ticket_id>/branch/<int:branch_id>/confirm-payment/', views.confirm_payment, name='confirm_payment'),
