@@ -227,6 +227,7 @@ class ParkingRate(models.Model):
         return f"{self.rate_type.capitalize()} Rate for {self.branch.branch_name} - {self.rate_value}"
 
 
+
 class ExpenditureCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -235,7 +236,14 @@ class ExpenditureCategory(models.Model):
     def __str__(self):
         return self.name
 
+class ExpenditureItem(models.Model):
+    category = models.ForeignKey(ExpenditureCategory, on_delete=models.CASCADE, related_name='items')
+    item_name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='items_created')
 
+    def __str__(self):
+        return self.item_name
 
 class Expenditure(models.Model):
     PAYMENT_METHOD_CHOICES = [
@@ -246,9 +254,9 @@ class Expenditure(models.Model):
 
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='expenditures')
     category = models.ForeignKey(ExpenditureCategory, on_delete=models.SET_NULL, null=True, related_name='expenditures')
-    item_name = models.CharField(max_length=255, blank=True, null=True)  # New field
-    quantity = models.PositiveIntegerField(default=1)  # New field
-    price_per_item = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # New field
+    item_name = models.CharField(max_length=255, blank=True, null=True)
+    quantity = models.PositiveIntegerField(default=1)
+    price_per_item = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     proof_of_payment = models.FileField(upload_to='proof_of_payments/', null=True, blank=True)
@@ -259,7 +267,6 @@ class Expenditure(models.Model):
 
     def __str__(self):
         return f"{self.category.name} - {self.amount} ({self.payment_method})"
-
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
@@ -275,7 +282,8 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"{self.item_name} ({self.quantity} x {self.price_per_item})"
-
+    
+    
 class AccountBalance(models.Model):
     branch = models.OneToOneField(Branch, on_delete=models.CASCADE, related_name='account_balance')
     cash = models.DecimalField(max_digits=10, decimal_places=2, default=0)
